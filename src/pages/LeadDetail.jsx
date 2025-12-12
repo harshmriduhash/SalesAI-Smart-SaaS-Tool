@@ -1,17 +1,17 @@
 // src/pages/LeadDetail.jsx
-import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useQueryClient } from '@tanstack/react-query';
+import React, { useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   Card,
   CardHeader,
   CardTitle,
   CardDescription,
   CardContent,
-  CardFooter
-} from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+  CardFooter,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -20,26 +20,29 @@ import {
   DialogDescription,
   DialogFooter,
   DialogTrigger,
-} from '@/components/ui/dialog';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Loader2, ArrowLeft, Pencil, Trash2, CheckCircle, XCircle } from 'lucide-react';
+} from "@/components/ui/dialog";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
-  useLead,
-  useUpdateLead,
-  useDeleteLead
-} from '@/hooks/useLeads';
+  Loader2,
+  ArrowLeft,
+  Pencil,
+  Trash2,
+  CheckCircle,
+  XCircle,
+} from "lucide-react";
+import { useLead, useUpdateLead, useDeleteLead } from "@/hooks/useLeads";
 
 import {
   useActivities,
   useCreateActivity,
   useUpdateActivity, // <--- Import useUpdateActivity hook
   useDeleteActivity, // <--- Import useDeleteActivity hook
-} from '@/hooks/useActivities'; // Correct path for activity-related hooks
+} from "@/hooks/useActivities"; // Correct path for activity-related hooks
 
-import AddActivityDialog from '@/components/activities/AddActivityDialog';
-import ActivityCard from '@/components/activities/ActivityCard';
-import LeadForm from '@/components/leads/LeadForm';
-import ActivityForm from '@/components/activities/ActivityForm'; // <--- Import the new ActivityForm
+import AddActivityDialog from "@/components/activities/AddActivityDialog";
+import ActivityCard from "@/components/activities/ActivityCard";
+import LeadForm from "@/components/leads/LeadForm";
+import ActivityForm from "@/components/activities/ActivityForm"; // <--- Import the new ActivityForm
 
 const LeadDetail = () => {
   const { id } = useParams();
@@ -49,16 +52,27 @@ const LeadDetail = () => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isAddActivityDialogOpen, setIsAddActivityDialogOpen] = useState(false);
-  const [isEditActivityDialogOpen, setIsEditActivityDialogOpen] = useState(false); // <--- New state for editing activity
+  const [isEditActivityDialogOpen, setIsEditActivityDialogOpen] =
+    useState(false); // <--- New state for editing activity
   const [editingActivity, setEditingActivity] = useState(null); // <--- New state to store activity being edited
 
   // Fetch lead details
-  const { data: lead, isLoading: isLeadLoading, isError: isLeadError, error: leadError } = useLead(id);
+  const {
+    data: lead,
+    isLoading: isLeadLoading,
+    isError: isLeadError,
+    error: leadError,
+  } = useLead(id);
   // Fetch all leads (needed for ActivityForm's lead selection dropdown)
   const { data: allLeads = [] } = useLead(); // Assuming useLead can fetch all if no ID is provided, or you need a useLeads() hook
 
   // Fetch activities related to this lead
-  const { data: activities, isLoading: isActivitiesLoading, isError: isActivitiesError, error: activitiesError } = useActivities({ leadId: id });
+  const {
+    data: activities,
+    isLoading: isActivitiesLoading,
+    isError: isActivitiesError,
+    error: activitiesError,
+  } = useActivities({ leadId: id });
 
   // Mutation hooks
   const updateLeadMutation = useUpdateLead();
@@ -70,11 +84,11 @@ const LeadDetail = () => {
   const handleUpdateLead = async (updatedData) => {
     try {
       await updateLeadMutation.mutateAsync({ id: lead.id, ...updatedData });
-      queryClient.invalidateQueries(['lead', lead.id]);
-      queryClient.invalidateQueries(['leads']);
+      queryClient.invalidateQueries(["lead", lead.id]);
+      queryClient.invalidateQueries(["leads"]);
       setIsEditDialogOpen(false);
     } catch (error) {
-      console.error('Failed to update lead:', error);
+      console.error("Failed to update lead:", error);
       // TODO: Implement user-friendly error notification
     }
   };
@@ -82,10 +96,10 @@ const LeadDetail = () => {
   const handleDeleteLead = async () => {
     try {
       await deleteLeadMutation.mutateAsync(lead.id);
-      queryClient.invalidateQueries(['leads']);
-      navigate('/leads');
+      queryClient.invalidateQueries(["leads"]);
+      navigate("/leads");
     } catch (error) {
-      console.error('Failed to delete lead:', error);
+      console.error("Failed to delete lead:", error);
       // TODO: Implement user-friendly error notification
     }
   };
@@ -93,22 +107,26 @@ const LeadDetail = () => {
   const handleCreateActivity = async (newActivityData) => {
     try {
       await createActivityMutation.mutateAsync(newActivityData);
-      queryClient.invalidateQueries(['activities', { leadId: id }]); // Invalidate activities for this lead
+      queryClient.invalidateQueries(["activities", { leadId: id }]); // Invalidate activities for this lead
       setIsAddActivityDialogOpen(false);
     } catch (error) {
-      console.error('Failed to create activity:', error);
+      console.error("Failed to create activity:", error);
       // TODO: Implement user-friendly error notification
     }
   };
 
-  const handleEditActivity = async (updatedActivityData) => { // <--- New handler for editing activities
+  const handleEditActivity = async (updatedActivityData) => {
+    // <--- New handler for editing activities
     try {
-      await updateActivityMutation.mutateAsync({ id: editingActivity._id, ...updatedActivityData });
-      queryClient.invalidateQueries(['activities', { leadId: id }]);
+      await updateActivityMutation.mutateAsync({
+        id: editingActivity._id,
+        ...updatedActivityData,
+      });
+      queryClient.invalidateQueries(["activities", { leadId: id }]);
       setIsEditActivityDialogOpen(false);
       setEditingActivity(null); // Clear editing state
     } catch (error) {
-      console.error('Failed to update activity:', error);
+      console.error("Failed to update activity:", error);
       // TODO: Implement user-friendly error notification
     }
   };
@@ -116,19 +134,22 @@ const LeadDetail = () => {
   const handleDeleteActivity = async (activityId) => {
     try {
       await deleteActivityMutation.mutateAsync(activityId);
-      queryClient.invalidateQueries(['activities', { leadId: id }]);
+      queryClient.invalidateQueries(["activities", { leadId: id }]);
     } catch (error) {
-      console.error('Failed to delete activity:', error);
+      console.error("Failed to delete activity:", error);
       // TODO: Implement user-friendly error notification
     }
   };
 
   const handleToggleActivityComplete = async (activityId, completedStatus) => {
     try {
-      await updateActivityMutation.mutateAsync({ id: activityId, completed: completedStatus });
-      queryClient.invalidateQueries(['activities', { leadId: id }]);
+      await updateActivityMutation.mutateAsync({
+        id: activityId,
+        completed: completedStatus,
+      });
+      queryClient.invalidateQueries(["activities", { leadId: id }]);
     } catch (error) {
-      console.error('Failed to toggle activity complete status:', error);
+      console.error("Failed to toggle activity complete status:", error);
     }
   };
 
@@ -147,9 +168,11 @@ const LeadDetail = () => {
         <Alert variant="destructive">
           <XCircle className="h-4 w-4" />
           <AlertTitle>Error</AlertTitle>
-          <AlertDescription>Failed to load lead: {leadError.message}</AlertDescription>
+          <AlertDescription>
+            Failed to load lead: {leadError.message}
+          </AlertDescription>
         </Alert>
-        <Button onClick={() => navigate('/leads')} className="mt-4">
+        <Button onClick={() => navigate("/leads")} className="mt-4">
           <ArrowLeft className="h-4 w-4 mr-2" /> Back to Leads
         </Button>
       </div>
@@ -164,7 +187,7 @@ const LeadDetail = () => {
           <AlertTitle>Not Found</AlertTitle>
           <AlertDescription>Lead not found.</AlertDescription>
         </Alert>
-        <Button onClick={() => navigate('/leads')} className="mt-4">
+        <Button onClick={() => navigate("/leads")} className="mt-4">
           <ArrowLeft className="h-4 w-4 mr-2" /> Back to Leads
         </Button>
       </div>
@@ -173,7 +196,11 @@ const LeadDetail = () => {
 
   return (
     <div className="container mx-auto p-6 max-w-4xl">
-      <Button variant="outline" onClick={() => navigate('/leads')} className="mb-6">
+      <Button
+        variant="outline"
+        onClick={() => navigate("/leads")}
+        className="mb-6"
+      >
         <ArrowLeft className="h-4 w-4 mr-2" /> Back to Leads
       </Button>
 
@@ -183,7 +210,7 @@ const LeadDetail = () => {
             <h1 className="text-3xl font-bold text-white">{lead.name}</h1>
             {lead.status && (
               <Badge className="ml-4 bg-purple-700 text-white border border-purple-500">
-                {lead.status.replace(/_/g, ' ')}
+                {lead.status.replace(/_/g, " ")}
               </Badge>
             )}
           </div>
@@ -198,7 +225,8 @@ const LeadDetail = () => {
                 <DialogHeader>
                   <DialogTitle>Edit Lead</DialogTitle>
                   <DialogDescription>
-                    Make changes to the lead details here. Click save when you're done.
+                    Make changes to the lead details here. Click save when
+                    you're done.
                   </DialogDescription>
                 </DialogHeader>
                 <LeadForm
@@ -210,7 +238,10 @@ const LeadDetail = () => {
               </DialogContent>
             </Dialog>
 
-            <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+            <Dialog
+              open={isDeleteDialogOpen}
+              onOpenChange={setIsDeleteDialogOpen}
+            >
               <DialogTrigger asChild>
                 <Button variant="destructive" size="icon">
                   <Trash2 className="h-5 w-5" />
@@ -220,11 +251,15 @@ const LeadDetail = () => {
                 <DialogHeader>
                   <DialogTitle>Are you sure?</DialogTitle>
                   <DialogDescription>
-                    This action cannot be undone. This will permanently delete the lead.
+                    This action cannot be undone. This will permanently delete
+                    the lead.
                   </DialogDescription>
                 </DialogHeader>
                 <DialogFooter>
-                  <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsDeleteDialogOpen(false)}
+                  >
                     Cancel
                   </Button>
                   <Button
@@ -232,7 +267,9 @@ const LeadDetail = () => {
                     onClick={handleDeleteLead}
                     disabled={deleteLeadMutation.isLoading}
                   >
-                    {deleteLeadMutation.isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    {deleteLeadMutation.isLoading && (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    )}
                     Delete
                   </Button>
                 </DialogFooter>
@@ -241,17 +278,58 @@ const LeadDetail = () => {
           </div>
         </CardHeader>
         <CardContent className="pt-2">
-          <p className="text-gray-300 mb-2">{lead.company} {lead.position ? `• ${lead.position}` : ''}</p>
+          <p className="text-gray-300 mb-2">
+            {lead.company} {lead.position ? `• ${lead.position}` : ""}
+          </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-200">
-            {lead.email && <p><strong>Email:</strong> {lead.email}</p>}
-            {lead.phone && <p><strong>Phone:</strong> {lead.phone}</p>}
-            {lead.industry && <p><strong>Industry:</strong> {lead.industry}</p>}
-            {lead.company_size && <p><strong>Company Size:</strong> {lead.company_size}</p>}
-            {lead.source && <p><strong>Source:</strong> {lead.source}</p>}
-            {lead.lead_score && <p><strong>Lead Score:</strong> {lead.lead_score}</p>}
-            {lead.estimated_value && <p><strong>Estimated Value:</strong> ${lead.estimated_value.toLocaleString()}</p>}
-            {lead.last_contact_date && <p><strong>Last Contact:</strong> {moment(lead.last_contact_date).format('MMM DD, YYYY')}</p>}
-            {lead.next_follow_up && <p><strong>Next Follow-up:</strong> {moment(lead.next_follow_up).format('MMM DD, YYYY')}</p>}
+            {lead.email && (
+              <p>
+                <strong>Email:</strong> {lead.email}
+              </p>
+            )}
+            {lead.phone && (
+              <p>
+                <strong>Phone:</strong> {lead.phone}
+              </p>
+            )}
+            {lead.industry && (
+              <p>
+                <strong>Industry:</strong> {lead.industry}
+              </p>
+            )}
+            {lead.company_size && (
+              <p>
+                <strong>Company Size:</strong> {lead.company_size}
+              </p>
+            )}
+            {lead.source && (
+              <p>
+                <strong>Source:</strong> {lead.source}
+              </p>
+            )}
+            {lead.lead_score && (
+              <p>
+                <strong>Lead Score:</strong> {lead.lead_score}
+              </p>
+            )}
+            {lead.estimated_value && (
+              <p>
+                <strong>Estimated Value:</strong> $
+                {lead.estimated_value.toLocaleString()}
+              </p>
+            )}
+            {lead.last_contact_date && (
+              <p>
+                <strong>Last Contact:</strong>{" "}
+                {moment(lead.last_contact_date).format("MMM DD, YYYY")}
+              </p>
+            )}
+            {lead.next_follow_up && (
+              <p>
+                <strong>Next Follow-up:</strong>{" "}
+                {moment(lead.next_follow_up).format("MMM DD, YYYY")}
+              </p>
+            )}
           </div>
           {lead.notes && (
             <div className="mt-4 p-3 bg-purple-800/50 rounded-md">
@@ -266,7 +344,10 @@ const LeadDetail = () => {
       <Card className="shadow-xl bg-purple-900/40 backdrop-blur-md text-white border-none">
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-white">Activities</CardTitle>
-          <Dialog open={isAddActivityDialogOpen} onOpenChange={setIsAddActivityDialogOpen}>
+          <Dialog
+            open={isAddActivityDialogOpen}
+            onOpenChange={setIsAddActivityDialogOpen}
+          >
             <DialogTrigger asChild>
               <Button size="sm">Add Activity</Button>
             </DialogTrigger>
@@ -282,7 +363,9 @@ const LeadDetail = () => {
                 onSubmit={handleCreateActivity}
                 submitButtonText="Create Activity"
                 isLoading={createActivityMutation.isLoading}
-                leads={[{ _id: lead._id, name: lead.name, company: lead.company }]} // Pass only this lead for context
+                leads={[
+                  { _id: lead._id, name: lead.name, company: lead.company },
+                ]} // Pass only this lead for context
               />
             </DialogContent>
           </Dialog>
@@ -296,7 +379,9 @@ const LeadDetail = () => {
             <Alert variant="destructive">
               <XCircle className="h-4 w-4" />
               <AlertTitle>Error</AlertTitle>
-              <AlertDescription>Failed to load activities: {activitiesError.message}</AlertDescription>
+              <AlertDescription>
+                Failed to load activities: {activitiesError.message}
+              </AlertDescription>
             </Alert>
           ) : activities && activities.length > 0 ? (
             <div>
@@ -305,7 +390,8 @@ const LeadDetail = () => {
                   key={activity._id}
                   activity={activity}
                   lead={lead} // Pass the lead data to activity card
-                  onEdit={(act) => { // <--- Set editing activity and open dialog
+                  onEdit={(act) => {
+                    // <--- Set editing activity and open dialog
                     setEditingActivity(act);
                     setIsEditActivityDialogOpen(true);
                   }}
@@ -321,7 +407,10 @@ const LeadDetail = () => {
       </Card>
 
       {/* Edit Activity Dialog */}
-      <Dialog open={isEditActivityDialogOpen} onOpenChange={setIsEditActivityDialogOpen}>
+      <Dialog
+        open={isEditActivityDialogOpen}
+        onOpenChange={setIsEditActivityDialogOpen}
+      >
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
             <DialogTitle>Edit Activity</DialogTitle>
@@ -335,7 +424,9 @@ const LeadDetail = () => {
               onSubmit={handleEditActivity}
               submitButtonText="Save Changes"
               isLoading={updateActivityMutation.isLoading}
-              leads={[{ _id: lead._id, name: lead.name, company: lead.company }]} // Pass only this lead
+              leads={[
+                { _id: lead._id, name: lead.name, company: lead.company },
+              ]} // Pass only this lead
             />
           )}
         </DialogContent>
