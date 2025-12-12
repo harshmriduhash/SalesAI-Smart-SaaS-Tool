@@ -15,11 +15,13 @@ export const sampleLeads = [
     source: "website",
     notes: "Interested in enterprise solution for team scaling",
     created_date: "2024-01-15T10:30:00Z",
-    ai_insights: "High-potential lead with budget authority. Focus on ROI and team productivity benefits.",
-    conversation_prep: "Discuss integration with their existing CI/CD pipeline and developer experience improvements."
+    ai_insights:
+      "High-potential lead with budget authority. Focus on ROI and team productivity benefits.",
+    conversation_prep:
+      "Discuss integration with their existing CI/CD pipeline and developer experience improvements.",
   },
   {
-    id: "2", 
+    id: "2",
     name: "Mike Chen",
     email: "mike.chen@healthplus.com",
     company: "HealthPlus Medical",
@@ -32,8 +34,8 @@ export const sampleLeads = [
     estimated_value: 35000,
     source: "referral",
     notes: "Looking to modernize patient data systems",
-    created_date: "2024-01-10T14:20:00Z"
-  }
+    created_date: "2024-01-10T14:20:00Z",
+  },
 ];
 
 export const sampleActivities = [
@@ -48,6 +50,6 @@ export const sampleActivities = [
     scheduled_date: "2024-01-20T09:00:00Z",
     completed: true,
     priority: "high",
-    created_date: "2024-01-15T16:00:00Z"
-  }
+    created_date: "2024-01-15T16:00:00Z",
+  },
 ];
